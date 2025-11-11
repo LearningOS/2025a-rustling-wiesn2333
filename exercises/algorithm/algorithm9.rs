@@ -1,9 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
-
 use std::cmp::Ord;
 use std::default::Default;
 
@@ -37,15 +35,28 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        if self.count > 1 {
+            let mut idx = self.count;
+            loop {
+                let parent = self.parent_idx(idx);
+                if !(self.comparator)(&self.items[parent], &self.items[idx]) {
+                    self.items.swap(parent, idx);
+                } else {
+                    break;
+                }
+                if parent > 1 {
+                    idx = parent;
+                } else {
+                    break;
+                }
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
         idx / 2
-    }
-
-    fn children_present(&self, idx: usize) -> bool {
-        self.left_child_idx(idx) <= self.count
     }
 
     fn left_child_idx(&self, idx: usize) -> usize {
@@ -57,8 +68,18 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+        if right >= self.count {
+            left
+        } else {
+            let items = &self.items;
+            if (self.comparator)(&items[left], &items[right]) {
+                right
+            } else {
+                left
+            }
+        }
     }
 }
 
@@ -84,8 +105,30 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+
+        if self.count >= 2 {
+            self.items.swap(1, self.count);
+        }
+        let value = self.items.pop().unwrap();
+        self.count -= 1;
+
+        if self.count >= 2 {
+            let mut idx = self.smallest_child_idx(1);
+            while idx <= self.count {
+                let parent = self.parent_idx(idx);
+                if !(self.comparator)(&self.items[parent], &self.items[idx]) {
+                    self.items.swap(parent, idx);
+                }
+                if parent <= 1 {
+                    break;
+                }
+                idx = self.smallest_child_idx(idx);
+            }
+        }
+        Some(value)
     }
 }
 
